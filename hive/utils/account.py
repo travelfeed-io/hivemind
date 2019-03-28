@@ -17,6 +17,11 @@ def safe_profile_metadata(account):
     about = str(prof['about']) if 'about' in prof else None
     location = str(prof['location']) if 'location' in prof else None
     website = str(prof['website']) if 'website' in prof else None
+    facebook = str(prof['facebook']) if 'facebook' in prof else None
+    twitter = str(prof['twitter']) if 'twitter' in prof else None
+    instagram = str(prof['instagram']) if 'instagram' in prof else None
+    youtube = str(prof['youtube']) if 'youtube' in prof else None
+    couchsurfing = str(prof['couchsurfing']) if 'couchsurfing' in prof else None
     profile_image = str(prof['profile_image']) if 'profile_image' in prof else None
     cover_image = str(prof['cover_image']) if 'cover_image' in prof else None
 
@@ -35,6 +40,17 @@ def safe_profile_metadata(account):
     if website and not _valid_url_proto(website):
         website = 'http://' + website
 
+    if facebook and len(facebook) > 50:
+    facebook = None
+    if twitter and len(twitter) > 15:
+        twitter = None
+    if instagram and len(instagram) > 30:
+        instagram = None
+    if youtube and len(youtube) > 50:
+        youtube = None
+    if couchsurfing and len(couchsurfing) > 50:
+        couchsurfing = None
+
     if profile_image and not _valid_url_proto(profile_image):
         profile_image = None
     if cover_image and not _valid_url_proto(cover_image):
@@ -49,6 +65,11 @@ def safe_profile_metadata(account):
         about=about or '',
         location=location or '',
         website=website or '',
+        facebook=facebook or '',
+        twitter=twitter or '',
+        instagram=instagram or '',
+        youtube=youtube or '',
+        couchsurfing=couchsurfing or '',
         profile_image=profile_image or '',
         cover_image=cover_image or '',
     )

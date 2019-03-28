@@ -43,6 +43,11 @@ def build_metadata():
         sa.Column('about', sa.String(160)),
         sa.Column('location', sa.String(30)),
         sa.Column('website', sa.String(100)),
+        sa.Column('facebook', sa.String(50)),
+        sa.Column('twitter', sa.String(15)),
+        sa.Column('instagram', sa.String(30)),
+        sa.Column('youtube', sa.String(50)),
+        sa.Column('couchsurfing', sa.String(50)),
         sa.Column('profile_image', sa.String(1024), nullable=False, server_default=''),
         sa.Column('cover_image', sa.String(1024), nullable=False, server_default=''),
 
