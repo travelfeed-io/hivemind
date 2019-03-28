@@ -41,7 +41,7 @@ def safe_profile_metadata(account):
         website = 'http://' + website
 
     if facebook and len(facebook) > 50:
-    facebook = None
+        facebook = None
     if twitter and len(twitter) > 15:
         twitter = None
     if instagram and len(instagram) > 30:

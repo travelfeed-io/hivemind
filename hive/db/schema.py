@@ -7,6 +7,8 @@ from sqlalchemy.types import CHAR
 from sqlalchemy.types import VARCHAR
 from sqlalchemy.types import TEXT
 from sqlalchemy.types import BOOLEAN
+from sqlalchemy.types import BIGINT
+from geoalchemy2.types import Geography
 
 #pylint: disable=line-too-long, too-many-lines
 
@@ -243,6 +245,23 @@ def build_metadata():
         sa.Column('author', VARCHAR(16), nullable=False),
         sa.Column('permlink', VARCHAR(255), nullable=False),
         sa.Column('category', VARCHAR(255), nullable=False, server_default=''),
+
+        # TravelFeed Geo-Location enables filtering for posts by location and creating location categories
+        sa.Column('latitude', sa.Float(precision=4)),
+        sa.Column('longitude', sa.Float(precision=4)),
+        Column('geo_location', Geography(geometry_type='POINT', srid=4326)), #PostGIS for better location queries
+        sa.Column('osm_type', VARCHAR(1)),
+        sa.Column('osm_id', BIGINT),
+        sa.Column('country_code', VARCHAR(2)), # The country names and the region/continent the countries are in can later be obtained through the API
+        sa.Column('subdivision', VARCHAR(100)),
+        sa.Column('city', VARCHAR(100)),
+        sa.Column('suburb', VARCHAR(100)),
+
+         # Enables querying for valid TravelFeed posts only
+        sa.Column('is_travelfeed', BOOLEAN, nullable=False, server_default='0'),
+
+         # TravelFeed Curation score
+        sa.Column('curation_score', sa.Integer, nullable=False, server_default='0'),
 
         # important/index
         sa.Column('depth', SMALLINT, nullable=False, server_default='0'),
