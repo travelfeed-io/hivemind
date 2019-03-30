@@ -181,6 +181,11 @@ class Accounts:
             'about':         profile['about'],
             'location':      profile['location'],
             'website':       profile['website'],
+            'facebook': profile['facebook'],
+            'twitter': profile['twitter'],
+            'instagram': profile['instagram'],
+            'youtube': profile['youtube'],
+            'couchsurfing': profile['couchsurfing'],
             'profile_image': profile['profile_image'],
             'cover_image':   profile['cover_image'],
 

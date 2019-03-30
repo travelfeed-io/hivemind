@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 async def load_accounts(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
     sql = """SELECT id, name, display_name, about, reputation, vote_weight,
-                    created_at, post_count, profile_image, location, website,
+                    created_at, post_count, profile_image, location, website, facebook, twitter, instagram, youtube, couchsurfing,
                     cover_image
                FROM hive_accounts WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
@@ -111,6 +111,11 @@ def _condenser_account_object(row):
             'profile': {'name': row['display_name'],
                         'about': row['about'],
                         'website': row['website'],
+                        'facebook': row['facebook'],
+                        'twitter': row['twitter'],
+                        'instagram': row['instagram'],
+                        'youtube': row['youtube'],
+                        'couchsurfing': row['couchsurfing'],
                         'location': row['location'],
                         'cover_image': row['cover_image'],
                         'profile_image': row['profile_image'],

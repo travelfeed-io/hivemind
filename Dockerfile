@@ -57,6 +57,8 @@ RUN chmod +x /usr/local/bin/hivesynccontinue.sh
 
 RUN \
     pip3 install . && \
+    pip3 install geoalchemy2 && \
+    pip3 install geopy && \
     apt-get remove -y \
         build-essential \
         libffi-dev \
