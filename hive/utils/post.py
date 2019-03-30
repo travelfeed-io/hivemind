@@ -65,7 +65,7 @@ def post_basic(post):
     if is_travelfeed:
         try:
             swm = re.findall(swmregex, body)
-            if len(swm) > 0:
+            if type(swm) is not 'undefined' and len(swm) > 0:
                 geolocation = swm[0]
                 latitude = round(float(geolocation[0]), 4) # Precision of 4 is exact enough
                 longitude = round(float(geolocation[1]), 4)
@@ -91,8 +91,6 @@ def post_basic(post):
                         subdivision = address.get('state_district', None)
                         if subdivision == None:
                             subdivision = address.get('county', None)
-                            if subdivision == None:
-                                subdivision = None
                 if len(subdivision) > 100:
                     subdivision = None
                 city = address.get('city', None)

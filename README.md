@@ -5,9 +5,14 @@ Comment out the line `sa.Column('geo_location', Geography(geometry_type='POINT',
 
 Install [PostGIS](https://postgis.net/install/) and run the command `CREATE EXTENSION postgis;` on your database (using psql).
 
+You also need to create the commented-put table with `ALTER TABLE "hive_posts_cache" ADD COLUMN geo_location geography(POINT,4326);` in psql.
+
 Now comment in the previously commented out line and start hive_sync again.
 
-Add indexes for columns queried by the API, e.g. `CREATE INDEX is_tf ON hive_posts_cache(is_travelfeed);`
+Add indexes for columns queried by the API, e.g. 
+`CREATE INDEX is_tf ON hive_posts_cache(is_travelfeed);`
+`CREATE INDEX posts_cache_author ON hive_posts_cache(author);`
+`CREATE INDEX posts_cache_permlink ON hive_posts_cache(permlink);`
 
 #### Developer-friendly microservice powering social networks on the Steem blockchain.
 
