@@ -51,7 +51,7 @@ def post_basic(post):
     # Default values
     latitude = None
     longitude = None
-    geo_location = None
+    # geo_location = None
     osm_type = None
     osm_id = None
     country_code= None
@@ -69,7 +69,7 @@ def post_basic(post):
                 geolocation = swm[0]
                 latitude = round(float(geolocation[0]), 4) # Precision of 4 is exact enough
                 longitude = round(float(geolocation[1]), 4)
-                geo_location = 'POINT('+str(latitude)+' '+str(longitude)+')'
+                # geo_location = 'POINT('+str(latitude)+' '+str(longitude)+')'
         except Exception as err:
             print(repr(err))
         if latitude != None:
@@ -132,7 +132,7 @@ def post_basic(post):
         'is_travelfeed': is_travelfeed,
         'latitude': latitude,
         'longitude': longitude,
-        'geo_location': geo_location,
+        # 'geo_location': geo_location,
         'osm_type': osm_type,
         'osm_id': osm_id,
         'country_code': country_code,

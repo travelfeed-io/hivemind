@@ -421,7 +421,7 @@ class CachedPost:
                 ('img_url',       basic['image']),	                
                 ('latitude', basic['latitude']),
                 ('longitude', basic['longitude']),
-                ('geo_location', basic['geo_location']),
+                # ('geo_location', basic['geo_location']),
                 ('osm_type', basic['osm_type']),
                 ('osm_id', basic['osm_id']),
                 ('country_code', basic['country_code']),

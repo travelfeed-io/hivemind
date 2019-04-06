@@ -249,7 +249,7 @@ def build_metadata():
         # TravelFeed Geo-Location enables filtering for posts by location and creating location categories
         sa.Column('latitude', sa.Float(precision=4)),
         sa.Column('longitude', sa.Float(precision=4)),
-        sa.Column('geo_location', Geography(geometry_type='POINT', srid=4326)), #PostGIS for better location queries. Important: Comment out this line on first start of `hive sync`, then open psql, connect to the db and execute `CREATE EXTENSION postgis;`, then restart `hive sync` with this line not commented out. Todo: Find way to create extension from sqlalchemy
+        # sa.Column('geo_location', Geography(geometry_type='POINT', srid=4326)), #PostGIS for better location queries. Important: Comment out this line on first start of `hive sync`, then open psql, connect to the db and execute `CREATE EXTENSION postgis;`, then restart `hive sync` with this line not commented out. Todo: Find way to create extension from sqlalchemy
         sa.Column('osm_type', VARCHAR(1)),
         sa.Column('osm_id', BIGINT),
         sa.Column('country_code', VARCHAR(2)), # The country names and the region/continent the countries are in can later be obtained through the API
