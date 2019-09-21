@@ -89,28 +89,26 @@ class Posts:
         return DB.query_one(sql, id=pid)
 
     @classmethod
-    def delete_ops(cls, ops):
-        """Given a list of delete ops, mark the posts as deleted.
+    def delete_op(cls, op):
+        """Given a delete_comment op, mark the post as deleted.
 
-        (And remove them from the feed cache.)
+        Also remove it from post-cache and feed-cache.
         """
-        for op in ops:
-            cls.delete(op)
+        cls.delete(op)
 
     @classmethod
-    def comment_ops(cls, ops, block_date):
+    def comment_op(cls, op, block_date):
         """Register new/edited/undeleted posts; insert into feed cache."""
-        for op in ops:
-            pid = cls.get_id(op['author'], op['permlink'])
-            if not pid:
-                # post does not exist, go ahead and process it.
-                cls.insert(op, block_date)
-            elif not cls.is_pid_deleted(pid):
-                # post exists, not deleted, thus an edit. ignore.
-                cls.update(op, block_date, pid)
-            else:
-                # post exists but was deleted. time to reinstate.
-                cls.undelete(op, block_date, pid)
+        pid = cls.get_id(op['author'], op['permlink'])
+        if not pid:
+            # post does not exist, go ahead and process it.
+            cls.insert(op, block_date)
+        elif not cls.is_pid_deleted(pid):
+            # post exists, not deleted, thus an edit. ignore.
+            cls.update(op, block_date, pid)
+        else:
+            # post exists but was deleted. time to reinstate.
+            cls.undelete(op, block_date, pid)
 
     @classmethod
     def insert(cls, op, date):
@@ -156,6 +154,11 @@ class Posts:
             CachedPost.delete(pid, op['author'], op['permlink'])
             if depth == 0:
                 FeedCache.delete(pid)
+            else:
+                # force parent child recount when child is deleted
+                prnt = cls._get_parent_by_child_id(pid)
+                CachedPost.recount(prnt['author'], prnt['permlink'], prnt['id'])
+
 
     @classmethod
     def update(cls, op, date, pid):
@@ -167,6 +170,16 @@ class Posts:
         # pylint: disable=unused-argument
         if not DbState.is_initial_sync():
             CachedPost.update(op['author'], op['permlink'], pid)
+
+    @classmethod
+    def _get_parent_by_child_id(cls, child_id):
+        """Get parent's `id`, `author`, `permlink` by child id."""
+        sql = """SELECT id, author, permlink FROM hive_posts
+                  WHERE id = (SELECT parent_id FROM hive_posts
+                               WHERE id = :child_id)"""
+        result = DB.query_row(sql, child_id=child_id)
+        assert result, "parent of %d not found" % child_id
+        return result
 
     @classmethod
     def _insert_feed_cache(cls, post):

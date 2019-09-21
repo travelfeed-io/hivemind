@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 async def load_accounts(db, names):
     """`get_accounts`-style lookup for `get_state` compat layer."""
     sql = """SELECT id, name, display_name, about, reputation, vote_weight,
-                    created_at, post_count, profile_image, location, website, facebook, twitter, instagram, youtube, couchsurfing,
+                    created_at, post_count, profile_image, location, website,
                     cover_image
                FROM hive_accounts WHERE name IN :names"""
     rows = await db.query_all(sql, names=tuple(names))
@@ -73,7 +73,7 @@ async def load_posts(db, ids, truncate_body=0):
     # in rare cases of cache inconsistency, recover and warn
     missed = set(ids) - posts_by_id.keys()
     if missed:
-        log.info("get_posts do not exist in cache: %s", repr(missed))
+        log.warning("get_posts do not exist in cache: %s", repr(missed))
         for _id in missed:
             ids.remove(_id)
             sql = ("SELECT id, author, permlink, depth, created_at, is_deleted "
@@ -81,9 +81,12 @@ async def load_posts(db, ids, truncate_body=0):
             post = await db.query_row(sql, id=_id)
             if not post['is_deleted']:
                 # TODO: This should never happen. See #173 for analysis
-                log.error("missing post -- %s", dict(post))
+                log.error("missing post -- force insert %s", dict(post))
+                sql = """INSERT INTO hive_posts_cache (post_id, author, permlink)
+                              VALUES (:id, :author, :permlink)"""
+                await db.query(sql, **post)
             else:
-                log.info("requested deleted post: %s", dict(post))
+                log.warning("requested deleted post: %s", dict(post))
 
     return [posts_by_id[_id] for _id in ids]
 
@@ -91,7 +94,7 @@ async def _query_author_rep_map(db, posts):
     """Given a list of posts, returns an author->reputation map."""
     if not posts:
         return {}
-    names = tuple({post['author'] for post in posts})
+    names = tuple(set([post['author'] for post in posts]))
     sql = "SELECT name, reputation FROM hive_accounts WHERE name IN :names"
     return {r['name']: r['reputation'] for r in await db.query_all(sql, names=names)}
 
@@ -108,11 +111,6 @@ def _condenser_account_object(row):
             'profile': {'name': row['display_name'],
                         'about': row['about'],
                         'website': row['website'],
-                        'facebook': row['facebook'],
-                        'twitter': row['twitter'],
-                        'instagram': row['instagram'],
-                        'youtube': row['youtube'],
-                        'couchsurfing': row['couchsurfing'],
                         'location': row['location'],
                         'cover_image': row['cover_image'],
                         'profile_image': row['profile_image'],
@@ -194,14 +192,9 @@ def _hydrate_active_votes(vote_csv):
     """Convert minimal CSV representation into steemd-style object."""
     if not vote_csv:
         return []
-    votes = []
-    for line in vote_csv.split("\n"):
-        voter, rshares, percent, reputation = line.split(',')
-        votes.append(dict(voter=voter,
-                          rshares=rshares,
-                          percent=percent,
-                          reputation=rep_to_raw(reputation)))
-    return votes
+    cols = 'voter,rshares,percent,reputation'.split(',')
+    votes = vote_csv.split("\n")
+    return [dict(zip(cols, line.split(','))) for line in votes]
 
 def _json_date(date=None):
     """Given a db datetime, return a steemd/json-friendly version."""
