@@ -46,8 +46,8 @@ def post_basic(post):
         body = body.replace('\x00', '[NUL]')
 
     # Mark valid TravelFeed posts
-    is_travelfeed = 'travelfeed' in tags and len(body.split(" ")) > 240
-
+    is_travelfeed = 'travelfeed' in tags and ('introduceyourself' in tags or len(body.split(" ")) > 240)
+    
     # Default values
     latitude = None
     longitude = None
