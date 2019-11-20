@@ -59,13 +59,12 @@ class Blocks:
     @classmethod
     def _process(cls, block, is_initial_sync=False):
         """Process a single block. Assumes a trx is open."""
+        #pylint: disable=too-many-branches
         num = cls._push(block)
         date = block['timestamp']
 
         account_names = set()
-        comment_ops = []
         json_ops = []
-        delete_ops = []
         for tx_idx, tx in enumerate(block['transactions']):
             for operation in tx['operations']:
                 op_type = operation['type']
@@ -83,11 +82,19 @@ class Blocks:
                 elif op_type == 'create_claimed_account_operation':
                     account_names.add(op['new_account_name'])
 
+                # account metadata updates
+                elif op_type == 'account_update_operation':
+                    if not is_initial_sync:
+                        Accounts.dirty(set([op['account']]))
+                elif op_type == 'account_update2_operation':
+                    if not is_initial_sync:
+                        Accounts.dirty(set([op['account']]))
+
                 # post ops
                 elif op_type == 'comment_operation':
-                    comment_ops.append(op)
+                    Posts.comment_op(op, date)
                 elif op_type == 'delete_comment_operation':
-                    delete_ops.append(op)
+                    Posts.delete_op(op)
                 elif op_type == 'vote_operation':
                     if not is_initial_sync:
                         CachedPost.vote(op['author'], op['permlink'])
@@ -99,8 +106,6 @@ class Blocks:
                     json_ops.append(op)
 
         Accounts.register(account_names, date)     # register any new names
-        Posts.comment_ops(comment_ops, date)       # handle inserts, edits
-        Posts.delete_ops(delete_ops)               # handle post deletion
         CustomOp.process_ops(json_ops, num, date)  # follow/reblog/community ops
 
         return num
@@ -197,12 +202,16 @@ class Blocks:
             post_ids = tuple(DB.query_col(sql, date=date))
 
             # remove all recent records
-            DB.query("DELETE FROM hive_posts_cache WHERE post_id IN :ids", ids=post_ids)
             DB.query("DELETE FROM hive_feed_cache  WHERE created_at >= :date", date=date)
             DB.query("DELETE FROM hive_reblogs     WHERE created_at >= :date", date=date)
             DB.query("DELETE FROM hive_follows     WHERE created_at >= :date", date=date) #*
-            DB.query("DELETE FROM hive_post_tags   WHERE post_id IN :ids", ids=post_ids)
-            DB.query("DELETE FROM hive_posts       WHERE id IN :ids", ids=post_ids)
+
+            # remove posts: core, tags, cache entries
+            if post_ids:
+                DB.query("DELETE FROM hive_posts_cache WHERE post_id IN :ids", ids=post_ids)
+                DB.query("DELETE FROM hive_post_tags   WHERE post_id IN :ids", ids=post_ids)
+                DB.query("DELETE FROM hive_posts       WHERE id      IN :ids", ids=post_ids)
+
             DB.query("DELETE FROM hive_payments    WHERE block_num = :num", num=num)
             DB.query("DELETE FROM hive_blocks      WHERE num = :num", num=num)
 

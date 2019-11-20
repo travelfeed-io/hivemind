@@ -122,7 +122,7 @@ Precedence: CLI over ENV over hive.conf. Check `hive --help` for details.
 
 Build flags
 
- - `LOW_MEMORY_MODE=OFF` - need post content
+ - `LOW_MEMORY_NODE=OFF` - need post content
  - `CLEAR_VOTES=OFF` - need all vote data
  - `SKIP_BY_TX=ON` - tx lookup not used
 
@@ -173,6 +173,10 @@ condenser_api.get_discussions_by_blog
 condenser_api.get_discussions_by_feed
 condenser_api.get_discussions_by_comments
 condenser_api.get_replies_by_last_update
+
+condenser_api.get_blog
+condenser_api.get_blog_entries
+condenser_api.get_discussions_by_author_before_date
 ```
 
 
