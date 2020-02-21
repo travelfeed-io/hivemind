@@ -45,8 +45,13 @@ def post_basic(post):
         #url = post['author'] + '/' + post['permlink']
         body = body.replace('\x00', '[NUL]')
 
+    category = post['category']
+
+    # TravelFeed communities
+    hive_communities = ['hive-184437', 'hive-177777', 'hive-188888', 'hive-199999', 'hive-155555', 'hive-122222', 'hive-147474', 'hive-100001', 'hive-166666', 'hive-144444', 'hive-133337', 'hive-104387']
+
     # Mark valid TravelFeed posts
-    is_travelfeed = 'travelfeed' in tags and ('introduceyourself' in tags or len(body.split(" ")) > 240)
+    is_travelfeed = ('travelfeed' in tags or category in hive_communities) and ('introduceyourself' in tags or len(body.split(" ")) > 240)
     
     # Default values
     latitude = None
